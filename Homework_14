@@ -1,0 +1,50 @@
+#создание базы данных
+use denisdb;
+#создание коллекции пользователи
+db.createCollection("users", {validator: { $jsonSchema: { 
+      bsonType: "object", 
+      required: [ "name"], 
+      properties: { 
+         name: { 
+            bsonType: "string", 
+            description: "required and must be a string"}
+            }
+      }
+}});
+#создание коллекции объявления
+db.createCollection("notifications2", {validator: { $jsonSchema: { 
+      bsonType: "object", 
+      required: [ "notificationbody", "autor"], 
+      properties: { 
+         name: { 
+            bsonType: "string", 
+            description: "required and must be a string"},
+         autor: { 
+            bsonType: "objectId", 
+            description: "required and must be a string"},
+      }
+}}});
+#добавление записей в коллекцию пользователей
+db.users.insertOne({
+    name: "Billy"
+})
+#добавление записей в коллекцию объявления
+db.notifications.insertOne({
+    notificationbody: "Сегодня я опоздаю",
+    autor: ObjectId("6399684feee9e520a2e4927b")
+})
+db.notifications.insertOne({
+    notificationbody: "Где моя зарплата?!",
+    autor: ObjectId("6399687ceee9e520a2e4927c")
+})
+#удаление записи
+db.notifications.deleteOne({_id: ObjectId("639970adeee9e520a2e4927e")})
+#поиск
+db.notifications.aggregate([{
+    $lookup:{
+        from: "users",
+        localField: "autor",
+        foreignField: "_id",
+        as: "array-field"
+    }
+}])
